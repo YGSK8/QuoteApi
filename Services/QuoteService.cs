@@ -7,7 +7,8 @@ public class QuoteService:IQuoteService
 {
     private List<string> _quotes = ["String 1", "String 2", "String 3", "String 4", "String 5", "String 6","String 7","String 8","String 9","String 10"];
     private IRepository<Quote> _repository;
-
+    public event Action? NewQuoteAdded;
+    public event Action<Quote>? GetLatestQuote;
     public QuoteService(IRepository<Quote> repository)
     {
         _repository = repository;
@@ -29,6 +30,8 @@ public class QuoteService:IQuoteService
             int id = _repository.GetAll().Count+1;
             Quote quote = new(id,text);
             _repository.Add(quote);
+            NewQuoteAdded?.Invoke();
+            GetLatestQuote?.Invoke(quote);
             return quote;
         }
         return null;

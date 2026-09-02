@@ -9,4 +9,6 @@ public interface IQuoteService
 
     public Quote? GetQuoteById(int id);
     public Quote? AddQuote(string text);
+    public event Action? NewQuoteAdded;
+    public event Action<Quote>? GetLatestQuote;
 }
