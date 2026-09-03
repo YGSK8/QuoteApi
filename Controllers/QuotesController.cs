@@ -30,6 +30,7 @@ public class QuotesController : ControllerBase
     [HttpPost]
     public IActionResult AddQuote([FromBody] ClientQuote clientquote)
     {
+        if(String.IsNullOrWhiteSpace(clientquote.Text)) return BadRequest("Text cannot be empty or consist only of white-space characters");
         Quote? quote = _quoteService.AddQuote(clientquote.Text);
         if(quote==null)return BadRequest($"Quote already exists");
         return Ok(quote);
