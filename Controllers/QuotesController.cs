@@ -45,4 +45,12 @@ public class QuotesController : ControllerBase
         else return Ok(quote);
     }
 
+    [Route("MiddlewareExceptionTest")]
+    [HttpGet]
+    
+    public IActionResult ThrowException()
+    {
+        throw new Exception("This might contain sensitive information and should not be exposed to the client!");
+    }
+
 }
