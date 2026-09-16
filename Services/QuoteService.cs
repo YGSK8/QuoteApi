@@ -7,10 +7,10 @@ namespace QuoteApi.Services;
 public class QuoteService:IQuoteService
 {
     private List<string> _quotes = ["String 1", "String 2", "String 3", "String 4", "String 5", "String 6","String 7","String 8","String 9","String 10"];
-    private IRepository<Quote> _repository;
+    private IRepository<Quote,QuoteApiDbContext> _repository;
     public event Action? NewQuoteAdded;
     public event Action<Quote>? GetLatestQuote;
-    public QuoteService(IRepository<Quote> repository)
+    public QuoteService(IRepository<Quote,QuoteApiDbContext> repository)
     {
         _repository = repository;
     }
