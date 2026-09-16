@@ -1,5 +1,6 @@
 using QuoteApi.Repositories;
 using QuoteApi.Models;
+using QuoteApi.Data;
 
 namespace QuoteApi.Services;
 
@@ -18,26 +19,26 @@ public class QuoteService:IQuoteService
         Random rand = new Random();
         return _quotes[rand.Next(0,10)];
     }
-    public List<Quote> GetQuotes()
+    public async Task<List<Quote>> GetQuotes()
     {
-        return _repository.GetAll();
+        return await _repository.GetAllAsync();
     }
     
-    public Quote? AddQuote(string text)
+    public async Task<Quote?> AddQuoteAsync(string text)
     {
-        if(_repository.FindBy((quote)=>{if(quote.Text==text)return true;return false;}) == null)
+        if(await _repository.FindByAsync((quote)=>{if(quote.Text==text)return true;return false;}) == null)
         {
-            int id = _repository.GetAll().Count+1;
+            int id = (await _repository.GetAllAsync()).Count+1;
             Quote quote = new(id,text);
-            _repository.Add(quote);
+            await _repository.AddAsync(quote);
             NewQuoteAdded?.Invoke();
             GetLatestQuote?.Invoke(quote);
             return quote;
         }
         return null;
     }
-    public Quote? GetQuoteById(int id)
+    public async Task<Quote?> GetQuoteById(int id)
     {
-        return _repository.FindBy(quote => quote.Id==id);
+        return await _repository.FindByAsync(quote => quote.Id==id);
     }
 }

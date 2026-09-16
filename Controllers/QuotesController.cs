@@ -22,25 +22,25 @@ public class QuotesController : ControllerBase
     }
     [Route("all")]
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        return Ok(_quoteService.GetQuotes());
+        return Ok(await _quoteService.GetQuotes());
     }
 
     [HttpPost]
-    public IActionResult AddQuote([FromBody] ClientQuote clientquote)
+    public async Task<IActionResult> AddQuote([FromBody] ClientQuote clientquote)
     {
         if(String.IsNullOrWhiteSpace(clientquote.Text)) return BadRequest("Text cannot be empty or consist only of white-space characters");
-        Quote? quote = _quoteService.AddQuote(clientquote.Text);
+        Quote? quote = await _quoteService.AddQuoteAsync(clientquote.Text);
         if(quote==null)return BadRequest($"Quote already exists");
         return Ok(quote);
     }
 
     [Route("{id}")]
     [HttpGet]
-    public IActionResult GetQuoteById(int id)
+    public async Task<IActionResult> GetQuoteById(int id)
     {
-        Quote? quote = _quoteService.GetQuoteById(id);
+        Quote? quote = await _quoteService.GetQuoteById(id);
         if(quote==null)return NotFound($"Quote with id {id} does not exist");
         else return Ok(quote);
     }

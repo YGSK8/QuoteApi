@@ -1,6 +1,6 @@
 namespace QuoteApi.Repositories;
 public interface IRepository<T>
-{   public void Add(T item);
-    public T? FindBy(Func<T,bool> predicate);
-    public List<T> GetAll();
+{   public Task AddAsync(T item);
+    public Task<T?> FindByAsync(Func<T,bool> predicate);
+    public Task<List<T>> GetAllAsync();
 }

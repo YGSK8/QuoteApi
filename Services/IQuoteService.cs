@@ -5,10 +5,10 @@ namespace QuoteApi.Services;
 public interface IQuoteService
 {
     public string GenerateRandomQuote();
-    public List<Quote> GetQuotes();
+    public Task<List<Quote>> GetQuotes();
 
-    public Quote? GetQuoteById(int id);
-    public Quote? AddQuote(string text);
+    public Task<Quote?> GetQuoteById(int id);
+    public Task<Quote?> AddQuoteAsync(string text);
     public event Action? NewQuoteAdded;
     public event Action<Quote>? GetLatestQuote;
 }
