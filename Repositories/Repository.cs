@@ -1,24 +1,29 @@
 namespace QuoteApi.Repositories;
 using QuoteApi.Data;
 using Microsoft.EntityFrameworkCore;
-public class Repository<T>:IRepository<T>
+using System.Linq.Expressions;
+
+public class Repository<T,TDbContext>:IRepository<T,TDbContext> where TDbContext:DbContext where T:class
 {
-    private List<T> _items = new ();
-    public Task AddAsync(T item)
+    private TDbContext _dbContext;
+
+    public Repository(TDbContext dbContext)
     {
-        _items.Add(item);
-        return Task.CompletedTask;
+        _dbContext = dbContext;
     }
-    public Task<T?> FindByAsync(Func<T,bool> predicate)
+    public async Task AddAsync(T item)
     {
-        foreach(T item in _items)
-        {
-            if (predicate(item))return Task.FromResult<T?>(item);
-        }
-        return Task.FromResult<T?>(default);
+        _dbContext.Add(item);
+        int count = await _dbContext.SaveChangesAsync();
+        Console.WriteLine($"successfully uploaded {count} record/s");
     }
-    public Task<List<T>> GetAllAsync()
+    public async Task<T?> FindByAsync(Expression<Func<T,bool>> predicate)
     {
-        return Task.FromResult<List<T>>([.._items]);
+        return await _dbContext.Set<T>().FirstOrDefaultAsync(predicate);
+    }
+    public async Task<List<T>> GetAllAsync()
+    {
+        return await _dbContext.Set<T>().ToListAsync<T>();
+        
     }
 }
