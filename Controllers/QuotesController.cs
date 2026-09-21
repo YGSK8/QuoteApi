@@ -24,16 +24,21 @@ public class QuotesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _quoteService.GetQuotes());
+        List<ClientQuoteResponse> response = new List<ClientQuoteResponse>();
+        foreach(Quote quote in await _quoteService.GetQuotes())
+        {
+            response.Add(new ClientQuoteResponse(quote));
+        }
+        return Ok(response);
     }
 
     [HttpPost]
     public async Task<IActionResult> AddQuote([FromBody] ClientQuote clientquote)
     {
-        if(String.IsNullOrWhiteSpace(clientquote.Text)) return BadRequest("Text cannot be empty or consist only of white-space characters");
-        Quote? quote = await _quoteService.AddQuoteAsync(clientquote.Text);
+        if(String.IsNullOrWhiteSpace(clientquote.Text)||String.IsNullOrWhiteSpace(clientquote.Author)) return BadRequest("Text cannot be empty or consist only of white-space characters");
+        Quote? quote = await _quoteService.AddQuoteAsync(clientquote.Text,clientquote.Author);
         if(quote==null)return BadRequest($"Quote already exists");
-        return Ok(quote);
+        return Ok(new ClientQuoteResponse(quote));
     }
 
     [Route("{id}")]
@@ -42,7 +47,7 @@ public class QuotesController : ControllerBase
     {
         Quote? quote = await _quoteService.GetQuoteById(id);
         if(quote==null)return NotFound($"Quote with id {id} does not exist");
-        else return Ok(quote);
+        else return Ok(new ClientQuoteResponse(quote));
     }
 
     [Route("MiddlewareExceptionTest")]

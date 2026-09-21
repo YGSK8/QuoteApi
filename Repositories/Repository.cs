@@ -1,9 +1,10 @@
 namespace QuoteApi.Repositories;
 using QuoteApi.Data;
 using Microsoft.EntityFrameworkCore;
-public class Repository<T,TDbContext>:IRepository<T,TDbContext> where TDbContext:DbContext
+using System.Linq.Expressions;
+
+public class Repository<T,TDbContext>:IRepository<T,TDbContext> where TDbContext:DbContext where T:class
 {
-    private List<T> _items = new ();
     private TDbContext _dbContext;
 
     public Repository(TDbContext dbContext)
@@ -16,16 +17,13 @@ public class Repository<T,TDbContext>:IRepository<T,TDbContext> where TDbContext
         int count = await _dbContext.SaveChangesAsync();
         Console.WriteLine($"successfully uploaded {count} record/s");
     }
-    public Task<T?> FindByAsync(Func<T,bool> predicate)
+    public async Task<T?> FindByAsync(Expression<Func<T,bool>> predicate)
     {
-        foreach(T item in _items)
-        {
-            if (predicate(item))return Task.FromResult<T?>(item); 
-        }
-        return Task.FromResult<T?>(default);
+        return await _dbContext.Set<T>().FirstOrDefaultAsync(predicate);
     }
-    public Task<List<T>> GetAllAsync()
+    public async Task<List<T>> GetAllAsync()
     {
-        return Task.FromResult<List<T>>([.._items]);
+        return await _dbContext.Set<T>().ToListAsync<T>();
+        
     }
 }

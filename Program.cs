@@ -4,11 +4,13 @@ using QuoteApi.Services;
 using QuoteApi.Middlewares;
 using QuoteApi.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<IQuoteService,QuoteService>();
 builder.Services.AddScoped<IRepository<Quote,QuoteApiDbContext>,Repository<Quote,QuoteApiDbContext>>();
+builder.Services.AddScoped<IRepository<Author,QuoteApiDbContext>,Repository<Author,QuoteApiDbContext>>();
 builder.Services.AddScoped<NewQuoteNotifier>();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<QuoteApiDbContext>((options)=>options.UseNpgsql("Host=localhost;Port=5432;Database=quoteapi;Username=yanishgooradoo"));
