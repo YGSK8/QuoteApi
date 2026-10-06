@@ -1,7 +1,9 @@
 namespace QuoteApi.Repositories;
 using QuoteApi.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Linq.Expressions;
+
 
 public class Repository<T,TDbContext>:IRepository<T,TDbContext> where TDbContext:DbContext where T:class
 {
@@ -21,9 +23,37 @@ public class Repository<T,TDbContext>:IRepository<T,TDbContext> where TDbContext
     {
         return await _dbContext.Set<T>().FirstOrDefaultAsync(predicate);
     }
+
+    public async Task<List<T>> GetAllWithIncludeAsync<TProperty>(Expression<Func<T,TProperty>> predicate)
+    {
+        return await _dbContext.Set<T>().Include(predicate).ToListAsync();
+    }
+
+    public async Task<List<T>> GetTUsingWhereTracked(Expression<Func<T,bool>> expression)
+    {
+        return await _dbContext.Set<T>().Where(expression).ToListAsync();
+    }
+
+    public async Task<List<T>> GetTUsingWhereUntracked(Expression<Func<T,bool>> expression)
+    {
+        return await _dbContext.Set<T>().Where(expression).AsNoTracking().ToListAsync();
+    }
+
     public async Task<List<T>> GetAllAsync()
     {
         return await _dbContext.Set<T>().ToListAsync<T>();
         
     }
+
+    public async Task SaveChanges()
+    {
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return _dbContext.Database.BeginTransactionAsync();
+    }
+
+
 }

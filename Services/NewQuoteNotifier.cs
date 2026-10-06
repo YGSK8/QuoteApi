@@ -9,9 +9,9 @@ public class NewQuoteNotifier
     }
     private void UploadQuote(Quote quote)
     {
-        Console.WriteLine($"Simulating uploading the Quote:'{quote}' to an inbox");
+        Console.WriteLine($"Simulating uploading the Quote:'{quote.Text}' to an inbox");
     }
-    public NewQuoteNotifier(IQuoteService service)
+    public void Subsribe(IQuoteService service)
     {
         service.NewQuoteAdded+=Notifier;
         service.GetLatestQuote+=UploadQuote;

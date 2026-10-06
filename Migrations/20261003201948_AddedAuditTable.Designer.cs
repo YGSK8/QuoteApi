@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using QuoteApi.Data;
@@ -11,9 +12,11 @@ using QuoteApi.Data;
 namespace QuoteApi.Migrations
 {
     [DbContext(typeof(QuoteApiDbContext))]
-    partial class QuoteApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261003201948_AddedAuditTable")]
+    partial class AddedAuditTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,12 +37,6 @@ namespace QuoteApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<uint>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid")
-                        .HasColumnName("xmin");
-
                     b.HasKey("Id");
 
                     b.ToTable("Authors");
@@ -48,8 +45,7 @@ namespace QuoteApi.Migrations
                         new
                         {
                             Id = -1,
-                            Name = "unknownAuthor",
-                            Version = 0u
+                            Name = "unknownAuthor"
                         });
                 });
 

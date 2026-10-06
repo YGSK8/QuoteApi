@@ -18,9 +18,11 @@ public record ClientQuoteResponse
 {
     public int Id {get;}
     public string Text {get;}
+    public string? AuthorName{get;}
     public ClientQuoteResponse(Quote quote)
     {
         Id = quote.Id;
         Text = quote.Text;
+        AuthorName = quote.Author?.Name;
     }   
 };

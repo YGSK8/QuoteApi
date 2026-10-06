@@ -5,6 +5,7 @@ public class QuoteApiDbContext : DbContext
 {
     public DbSet<Quote> Quotes {get;set;}
     public DbSet<Author> Authors {get;set;}
+    public DbSet<AuthorAudit> AuthorAuditLog {get;set;}
     public QuoteApiDbContext(DbContextOptions<QuoteApiDbContext> dbContextOptions):base(dbContextOptions)
     {
         
