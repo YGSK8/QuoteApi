@@ -123,7 +123,7 @@ public class QuotesController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Conflict($"Unable to modify Author due to concurrency conflict");
+            return Conflict($"Unable to modify Author with id {id} due to concurrency conflict. Refresh and try again.");
         }
     }
 
