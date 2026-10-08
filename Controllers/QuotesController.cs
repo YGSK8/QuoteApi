@@ -85,7 +85,7 @@ public class QuotesController : ControllerBase
     public async Task<IActionResult> AddAuthor(ClientAuthor authorName)
     {
         Author? author = await _quoteService.AddAuthor(authorName.Name);
-        if(author==null) return BadRequest($"Author already exists");
+        if(author==null) return Conflict($"Author already exists");
         return Ok($"{author.Name} has been added with Id {author.Id}");
     }
 
