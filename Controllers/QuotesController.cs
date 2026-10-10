@@ -84,6 +84,7 @@ public class QuotesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddAuthor(ClientAuthor authorName)
     {
+        if(authorName.Name.Length > _quoteService.Author_Settings.Value.MaxNameLength){return BadRequest($"Text length exceeds allowable limit of {_quoteService.Author_Settings.Value.MaxNameLength} characters");}
         Author? author = await _quoteService.AddAuthor(authorName.Name);
         if(author==null) return Conflict($"Author already exists");
         return Ok($"{author.Name} has been added with Id {author.Id}");

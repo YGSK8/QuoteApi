@@ -3,6 +3,8 @@ using QuoteApi.Models;
 using QuoteApi.Data;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Options;
+using QuoteApi.Settings;
 
 namespace QuoteApi.Services;
 
@@ -12,14 +14,15 @@ public class QuoteService:IQuoteService
     private IRepository<Quote,QuoteApiDbContext> _quoteRepository;
     private IRepository<Author,QuoteApiDbContext> _authorRepository;
     private IRepository<AuthorAudit,QuoteApiDbContext> _authorAuditLogRepository;
+    public IOptions<AuthorSettings> Author_Settings{get;}
     public event Action? NewQuoteAdded;
     public event Action<Quote>? GetLatestQuote;
-    public QuoteService(IRepository<Quote,QuoteApiDbContext> quoteRepository, IRepository<Author,QuoteApiDbContext> authorRepository,NewQuoteNotifier notifier, IRepository<AuthorAudit,QuoteApiDbContext> authorAuditLogRepository)
+    public QuoteService(IRepository<Quote,QuoteApiDbContext> quoteRepository, IRepository<Author,QuoteApiDbContext> authorRepository,NewQuoteNotifier notifier, IRepository<AuthorAudit,QuoteApiDbContext> authorAuditLogRepository, IOptions<AuthorSettings> authorSettings)
     {
         _authorAuditLogRepository = authorAuditLogRepository;
         _quoteRepository = quoteRepository;
         _authorRepository = authorRepository;
-
+        Author_Settings = authorSettings;
         notifier.Subsribe(this);
     }
     public string GenerateRandomQuote()
