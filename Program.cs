@@ -5,6 +5,7 @@ using QuoteApi.Middlewares;
 using QuoteApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using QuoteApi.Settings;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -13,6 +14,7 @@ builder.Services.AddScoped<IRepository<Quote,QuoteApiDbContext>,Repository<Quote
 builder.Services.AddScoped<IRepository<Author,QuoteApiDbContext>,Repository<Author,QuoteApiDbContext>>();
 builder.Services.AddScoped<IRepository<AuthorAudit,QuoteApiDbContext>,Repository<AuthorAudit,QuoteApiDbContext>>();
 builder.Services.AddSingleton<NewQuoteNotifier>();
+builder.Services.Configure<AuthorSettings>(builder.Configuration.GetSection("AuthorSettings"));
 builder.Services.AddOpenApi();
 string connectionString = builder.Configuration.GetConnectionString("QuoteApi") ?? throw new InvalidOperationException("Connection string to QuoteApi database not found");
 builder.Services.AddDbContext<QuoteApiDbContext>((options)=>options.UseNpgsql(connectionString));
