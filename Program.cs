@@ -14,7 +14,8 @@ builder.Services.AddScoped<IRepository<Author,QuoteApiDbContext>,Repository<Auth
 builder.Services.AddScoped<IRepository<AuthorAudit,QuoteApiDbContext>,Repository<AuthorAudit,QuoteApiDbContext>>();
 builder.Services.AddSingleton<NewQuoteNotifier>();
 builder.Services.AddOpenApi();
-builder.Services.AddDbContext<QuoteApiDbContext>((options)=>options.UseNpgsql("Host=localhost;Port=5432;Database=quoteapi;Username=yanishgooradoo"));
+string connectionString = builder.Configuration.GetConnectionString("QuoteApi") ?? throw new InvalidOperationException("Connection string to QuoteApi database not found");
+builder.Services.AddDbContext<QuoteApiDbContext>((options)=>options.UseNpgsql(connectionString));
 WebApplication app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
