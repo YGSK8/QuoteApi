@@ -4,7 +4,6 @@ using QuoteApi.Services;
 using QuoteApi.Middlewares;
 using QuoteApi.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using QuoteApi.Settings;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -23,3 +22,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
 app.MapOpenApi();
 app.Run();
+public partial class Program
+{
+    
+}
