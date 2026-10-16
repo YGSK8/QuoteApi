@@ -23,6 +23,12 @@ public class AddAuthorTests:IClassFixture<WebApplicationFactory<Program>>
         HttpResponseMessage response = await _client.PostAsync("/quotes/AddAuthor",body);
         Assert.Equal(HttpStatusCode.BadRequest,response.StatusCode);
     }
-
+    [Fact]
+    public async Task AddAuthor_NoNameProperty_Returns400()
+    {
+        JsonContent body = JsonContent.Create(new{});
+        HttpResponseMessage response = await _client.PostAsync("/quotes/AddAuthor",body);
+        Assert.Equal(HttpStatusCode.BadRequest,response.StatusCode);
+    }
 
 }
