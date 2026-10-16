@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 namespace QuoteApi.Tests;
 public class AddAuthorTests:IClassFixture<WebApplicationFactory<Program>>
 {
-    private HttpClient _client;
+    private readonly HttpClient _client;
     public AddAuthorTests(WebApplicationFactory<Program> factory)
     {
         _client = factory.CreateClient();
