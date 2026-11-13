@@ -5,7 +5,6 @@ using QuoteApi.Middlewares;
 using QuoteApi.Data;
 using Microsoft.EntityFrameworkCore;
 using QuoteApi.Settings;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<IQuoteService,QuoteService>();
