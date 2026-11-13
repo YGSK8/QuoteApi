@@ -1,20 +1,29 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using QuoteApi.Settings;
+using QuoteApi.Data;
+using QuoteApi.Services;
+using Microsoft.EntityFrameworkCore;
+
 namespace QuoteApi.Tests;
-public class AddAuthorTests:IClassFixture<WebApplicationFactory<Program>>
+public class AddAuthorTests:IClassFixture<QuoteApiFactory>
 {
     private readonly HttpClient _client;
-    private readonly WebApplicationFactory<Program> _factory;
-    public AddAuthorTests(WebApplicationFactory<Program> factory)
+    private readonly  QuoteApiFactory _factory;
+    public AddAuthorTests( QuoteApiFactory factory)
     {
         _factory = factory;
-        _client = factory.CreateClient();
+        _client = _factory.CreateClient();
+    }
+    [Fact]
+    public void App_UsesTestDatabase()
+    {
+        using IServiceScope scope = _factory.Services.CreateScope();
+        QuoteApiDbContext context = scope.ServiceProvider.GetRequiredService<QuoteApiDbContext>();
+        string connectionString = context.Database.GetDbConnection().ConnectionString;
+        Assert.Equal("quoteapi_test", connectionString.Split(';').Select(p => p.Split('=')).FirstOrDefault(p => p[0].Equals("Database", StringComparison.OrdinalIgnoreCase))?[1]);
     }
     [Fact]
     public async Task AddAuthor_EmptyName_Returns400()
