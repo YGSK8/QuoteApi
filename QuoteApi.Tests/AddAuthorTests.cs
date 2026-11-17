@@ -120,4 +120,36 @@ public class AddAuthorTests:IClassFixture<QuoteApiFactory>,IAsyncLifetime
         }
     }
 
+    [Fact]
+    public async Task RenameAuthorById_Success_Returns200()
+    {
+        const string name = "Polo";
+        try
+        {
+            ClientAuthor clientAuthor = new ClientAuthor{Name = _testAuthorName};
+            JsonContent jsonContent = JsonContent.Create(clientAuthor);
+            HttpResponseMessage addAuthorResponseMessage = await _client.PostAsync("/quotes/AddAuthor",jsonContent);
+            int? id;
+            using(IServiceScope scope = _factory.Services.CreateScope())
+            {
+                QuoteApiDbContext dbContext = scope.ServiceProvider.GetRequiredService<QuoteApiDbContext>();
+                Author? testAuthor = await dbContext.Authors.FirstOrDefaultAsync<Author>(author=> author.Name==_testAuthorName);
+                id = testAuthor?.Id;
+                Assert.Equal(HttpStatusCode.OK,addAuthorResponseMessage.StatusCode);//--successfully uploaded _testAuthorName
+                Assert.Equal(_testAuthorName,testAuthor?.Name);//--successfully uploaded _testAuthorName
+            }
+            using(IServiceScope scope = _factory.Services.CreateScope())
+            {
+                QuoteApiDbContext dbContext = scope.ServiceProvider.GetRequiredService<QuoteApiDbContext>();
+                HttpResponseMessage modifyAuthorResponseMessage = await _client.PostAsync($"/quotes/Author/modify?id={id}&name={name}",null);
+                Author? modifiedAuthor = await dbContext.Authors.FirstOrDefaultAsync(author => author.Id==id);
+                Assert.Equal(HttpStatusCode.OK,modifyAuthorResponseMessage.StatusCode);
+                Assert.Equal(name,modifiedAuthor?.Name);
+            }
+        }
+        finally
+        {
+            await CleanUpTestAuthorRows(name);
+        }
+    }
 }
