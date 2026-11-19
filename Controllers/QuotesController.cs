@@ -119,6 +119,9 @@ public class QuotesController : ControllerBase
     {
         try
         {
+            Author? author = await _quoteService.GetAuthorById(id);
+            if(author == null)return NotFound($"Database does not contain an author with id {id}");
+            if(author.Name==name)return BadRequest("Proposed name must be different than current name"); 
             await _quoteService.ModifyAuthorName(id,name);
             return Ok("modification successful");
         }
