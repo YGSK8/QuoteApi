@@ -152,4 +152,28 @@ public class AddAuthorTests:IClassFixture<QuoteApiFactory>,IAsyncLifetime
             await CleanUpTestAuthorRows(name);
         }
     }
+    [Fact]
+    public async Task RenameAuthorById_FailDueToSameName_Returns400()
+    {
+        ClientAuthor author = new ClientAuthor{Name=_testAuthorName};
+        JsonContent jsonContent = JsonContent.Create(author);
+        HttpResponseMessage addTestAuthorMessage = await _client.PostAsync("/quotes/AddAuthor",jsonContent);
+        Assert.Equal(HttpStatusCode.OK,addTestAuthorMessage.StatusCode);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        QuoteApiDbContext dbContext = scope.ServiceProvider.GetRequiredService<QuoteApiDbContext>();
+        Author? testAuthor = await dbContext.Authors.FirstOrDefaultAsync(author=>author.Name==_testAuthorName);
+        Assert.NotNull(testAuthor); //--ensures testAuthor is not null because if author is null, so is id, and url validation will fail with status 400 as well
+        int id = testAuthor.Id;
+        Assert.Equal(_testAuthorName,testAuthor.Name);
+        HttpResponseMessage modifyAuthorWithSameNameMessage = await _client.PostAsync($"/quotes/Author/modify?id={id}&name={_testAuthorName}",null);
+        Assert.Equal(HttpStatusCode.BadRequest,modifyAuthorWithSameNameMessage.StatusCode);
+    }
+    [Fact]
+    public async Task RenameAuthorById_FailDueToInvalidId_Returns404()
+    {
+        const string name = "irrelevant";
+        const int incorrectId = -99999999;
+        HttpResponseMessage modifyAuthorWithIncorrectId = await _client.PostAsync($"/quotes/Author/modify?id={incorrectId}&name={name}",null);
+        Assert.Equal(HttpStatusCode.NotFound,modifyAuthorWithIncorrectId.StatusCode);
+    }
 }
