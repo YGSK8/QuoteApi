@@ -26,7 +26,7 @@ public class Repository<T,TDbContext>:IRepository<T,TDbContext> where TDbContext
 
     public async Task<List<T>> GetAllWithIncludeAsync<TProperty>(Expression<Func<T,TProperty>> predicate)
     {
-        return await _dbContext.Set<T>().Include(predicate).ToListAsync();
+        return await _dbContext.Set<T>().AsNoTracking().Include(predicate).ToListAsync();
     }
 
     public async Task<List<T>> GetTUsingWhereTracked(Expression<Func<T,bool>> expression)
