@@ -8,6 +8,9 @@ using QuoteApi.Services;
 using Microsoft.EntityFrameworkCore;
 using QuoteApi.Models;
 using QuoteApi.Repositories;
+using Microsoft.AspNetCore.Http.HttpResults;
+using System.Data;
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace QuoteApi.Tests;
 public class AddAuthorTests:IClassFixture<QuoteApiFactory>,IAsyncLifetime
@@ -175,5 +178,53 @@ public class AddAuthorTests:IClassFixture<QuoteApiFactory>,IAsyncLifetime
         const int incorrectId = -99999999;
         HttpResponseMessage modifyAuthorWithIncorrectId = await _client.PostAsync($"/quotes/Author/modify?id={incorrectId}&name={name}",null);
         Assert.Equal(HttpStatusCode.NotFound,modifyAuthorWithIncorrectId.StatusCode);
+    }
+
+    [Fact]
+    public async Task RenameAuthorById_FailDueToConcurrencyException_Returns409()
+    {
+        await using (WebApplicationFactory<Program> secondFactory = _factory.WithWebHostBuilder((builder) =>
+        {
+            builder.ConfigureServices((serviceCollection) =>
+            {
+                List<ServiceDescriptor> serviceDescriptors = serviceCollection.ToList();
+                ServiceDescriptor quoteService = null;
+                foreach(ServiceDescriptor serviceDescriptor in serviceDescriptors)
+                {
+                    if(serviceDescriptor.ServiceType == typeof(IQuoteService)) quoteService = serviceDescriptor;
+                }
+                serviceCollection.Remove(quoteService);
+                serviceCollection.AddScoped<IQuoteService,QuoteServiceTest>();
+                string connectionString = builder.GetSetting("ConnectionStrings:QuoteApi");
+                serviceCollection.AddDbContext<QuoteApiDbContextTest>((options)=>options.UseNpgsql(connectionString));
+            });
+        }))
+        {
+            const string newName = "modified";
+            using IServiceScope scope = secondFactory.Services.CreateScope();
+            QuoteServiceTest serviceTest = (QuoteServiceTest)scope.ServiceProvider.GetRequiredService<IQuoteService>();
+            QuoteApiDbContext dbContext = scope.ServiceProvider.GetRequiredService<QuoteApiDbContext>();
+            string connexString = serviceTest._quoteApiDBContextTest.Database.GetDbConnection().ConnectionString;
+            Assert.Equal("quoteapi_test", connexString.Split(';').Select(p => p.Split('=')).FirstOrDefault(p => p[0].Equals("Database", StringComparison.OrdinalIgnoreCase))?[1]);//--just making sure second factory is using the correct connection string
+            HttpClient client = secondFactory.CreateClient();
+            ClientAuthor author = new ClientAuthor{Name = _testAuthorName};
+            JsonContent jsonContent = JsonContent.Create(author);
+            HttpResponseMessage httpResponseMessage = await client.PostAsync("/quotes/AddAuthor",jsonContent);
+            string message = await httpResponseMessage.Content.ReadAsStringAsync();
+            Assert.Equal(HttpStatusCode.OK,httpResponseMessage.StatusCode);//--successfully added author
+            Author trackedAuthor = dbContext.Authors.FirstOrDefault((author)=> author.Name == _testAuthorName);
+            int id = trackedAuthor.Id;
+            try
+            {
+                HttpResponseMessage httpResponseMessageModifyAuthor = await client.PostAsync($"/quotes/Author/modify?id={id}&name={newName}",null);
+                string messageModifyAuthor = await httpResponseMessageModifyAuthor.Content.ReadAsStringAsync();
+                Assert.Equal(HttpStatusCode.Conflict,httpResponseMessageModifyAuthor.StatusCode);
+                Assert.Contains("due to concurrency conflict",messageModifyAuthor); 
+            }
+            finally
+            {
+                await dbContext.Authors.Where((author)=>author.Id==id).ExecuteDeleteAsync(); //--cleaning up row added 
+            }
+        }
     }
 }
