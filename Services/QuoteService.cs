@@ -12,7 +12,7 @@ public class QuoteService:IQuoteService
 {
     private List<string> _quotes = ["String 1", "String 2", "String 3", "String 4", "String 5", "String 6","String 7","String 8","String 9","String 10"];
     private IRepository<Quote,QuoteApiDbContext> _quoteRepository;
-    private IRepository<Author,QuoteApiDbContext> _authorRepository;
+    protected IRepository<Author,QuoteApiDbContext> _authorRepository;
     private IRepository<AuthorAudit,QuoteApiDbContext> _authorAuditLogRepository;
     public IOptions<AuthorSettings> Author_Settings{get;}
     public event Action? NewQuoteAdded;
@@ -100,7 +100,7 @@ public class QuoteService:IQuoteService
         await _quoteRepository.SaveChanges();
     }
 
-    public async Task ModifyAuthorName(int id,string name)
+    public virtual async Task ModifyAuthorName(int id,string name)
     {
 
         Expression<Func<Author,bool>> expression = author => author.Id==id;
